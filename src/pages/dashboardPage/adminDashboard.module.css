@@ -1,0 +1,859 @@
+html, body {
+    background-color: #f8f9fa;
+    height: 100%;
+    /* overflow: hidden; */
+}
+
+.main {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    grid-template-rows: auto 1fr;
+    width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+    background: #ebf1f4;
+    background-image: linear-gradient(
+        rgba(255, 255, 255, 0.15),
+        rgba(255, 255, 255, 1)
+    ), url(logo.png);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center center;
+    background-size: contain;
+}
+
+/* Navbar Styling */
+.navbarContainer {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    background-color: lightblue;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    overflow: visible;
+    height: 55px;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.navbarHeading {
+    color: #212381;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.navbarSearchbar {
+    display: flex;
+    align-items: center;
+    background-color: #F3F4F6;
+    border-radius: 20px;
+    padding: 8px 15px;
+    margin-left: auto;
+    margin-right: 20px;
+    width: 300px;
+}
+
+.navbarSearchbar input {
+    border: none;
+    background-color: transparent;
+    outline: none;
+    margin-left: 10px;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.navbarSearchbar i, .navbar i {
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+.navbar .bx-bell {
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+/* Sidepanel Styling */
+.sidepanelContainer {
+    grid-column: 1 / 2;
+    grid-row: 1 / 3;
+    background-color:  #151a37;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    color: white;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo img {
+    height: 100px;
+    width: 100px;
+    border-radius: 8px;
+    image-rendering: auto;
+}
+
+.sidepanelNavigationsList {
+    list-style-type: none;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.sidepanelNavigationsList li {
+    padding: 12px 3px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    margin-top: 2px;
+    color: #fff;
+}
+
+.sidepanelNavigationsList li.active {
+    background-color: rgba(187, 186, 186, 0.2);
+    font-weight: 600;
+    margin-left: 0;
+    border-radius: 8px;
+    color: #fff;
+}
+
+.sidepanelNavigationsList li:hover{
+    background-color: rgba(187, 186, 186, 0.2);
+    border-radius: 8px;
+}
+
+.sidepanelNavigations i {
+    margin-right: 2px;
+    font-size: 1.2rem;
+    position: relative;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid rgba(187, 186, 186, 0.2);
+    margin: 10px 0 20px 0;
+}
+
+.sidepanelMembersHeading {
+    font-size: 0.95rem;
+    padding-left: 3px;
+    color: #fff;
+}
+
+.sidepanelMembersPhoto {
+    display: flex;
+    gap: 5px;
+    padding-left: 3px;
+    padding-top: 10px;
+}
+
+.sidepanelMembersPhotoList {
+    position: relative;
+    display: inline-block;
+}
+
+.memberAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #002944;
+    color: whitesmoke;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.memberTooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    pointer-events: none;
+    min-width: max-content;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 1000;
+    min-height: fit-content;
+    margin-bottom: 8px;
+}
+
+.sidepanelMembersPhotoList:first-child .memberTooltip {
+    left: auto;
+    transform: translateX(-10px);
+}
+
+.sidepanelMembersPhotoList:nth-child(2) .memberTooltip {
+    left: -15px;
+    transform: translateX(-10px);
+}
+
+.sidepanelMembersPhotoList:hover .memberTooltip {
+    opacity: 1;
+    overflow: visible;
+}
+
+.memberAvatar:hover {
+    transform: scale(1.1);
+}
+
+.sidepanelSettings {
+    margin-top: auto;
+}
+
+.sidepanelSettingsList {
+    list-style-type: none;
+}
+
+.sidepanelSettingsList li {
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #fff;
+}
+
+.sidepanelSettingsList li:hover{
+    background-color: rgba(187, 186, 186, 0.2);
+    border-radius: 8px;
+}
+
+.sidepanelSettings i {
+    font-size: 1.2rem;
+    position: relative;
+}
+
+/* Support Modal Styles */
+.supportModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.supportModal {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.supportModal h3 {
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+}
+
+.supportButton {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.supportButton:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.supportButton i {
+    margin-right: 0.5rem;
+}
+
+.closeModalButton {
+    display: block;
+    width: 100%;
+    padding: 0.8rem;
+    margin-top: 1.5rem;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Overview section */
+.electionsContainer,
+.voterMgtContainer,
+.candidateMgtContainer,
+.analyticsContainer {
+    height: calc(100vh - 55px);
+    overflow-y: auto;
+    padding-bottom: 20px;
+}
+
+.electionsContainerCards,
+.voterMgtContainerCards,
+.candidateMgtContainerCards,
+.analyticsContainerCards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 0 1rem;
+}
+
+.electionsContainerCardsContent,
+.voterMgtContainerCardsContent,
+.candidateMgtContainerCardsContent,
+.analyticsContainerCardsContent {
+    background-color: darkgray;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    min-height: 120px;
+    transition: transform 0.2s ease;
+}
+
+.electionsContainerCardsCount,
+.voterMgtContainerCardsCount,
+.candidateMgtContainerCardsCount,
+.analyticsContainerCardsCount {
+    padding-top: 0.8rem;
+    font-weight: 900;
+    color: #212381;
+}
+
+.electionsContainerCardsContent:first-child,
+.electionsContainerCardsContent:nth-child(2),
+.electionsContainerCardsContent:nth-child(3) {
+    background-color: darkgray;
+}
+
+.electionsContainerCardsContent:hover,
+.voterMgtContainerCardsContent:hover,
+.candidateMgtContainerCardsContent:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/*Heading positioning */
+.electionsContainerHeading,
+.voterMgtContainerHeading,
+.candidateMgtContainerHeading,
+.analyticsContainerHeading {
+    display: flex;
+    gap: 0.1rem;
+    padding: 1rem;
+}
+
+/* icon positioning */
+.electionsContainerHeading i.bx-message-square-detail,
+.voterMgtContainerHeading i.bx.bx-user,
+.candidateMgtContainerHeading i.bx.bx-user-pin,
+.analyticsContainerHeading i.bx.bx-line-chart {
+    position: relative;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.electionListContainerHeading,
+.voterListContainerHeading,
+.candidateListContainerHeading,
+.chartCard h3 {
+    padding: 1rem;
+    display: flex;
+    gap: 0.1rem;
+}
+
+.electionListContainer i.bx.bx-list-ul,
+.voterListContainer i.bx.bx-list-ul,
+.candidateListContainer i.bx.bx-group,
+.chartCard i.bx.bx-bar-chart-alt-2,
+.chartCard i.bx.bx-pie-chart-alt-2,
+.chartCard i.bx.bx-trending-up {
+    font-size: 1.5rem;
+}
+
+.electionListContainerTable,
+.voterListContainerTable,
+.candidateListContainerTable {
+    width: 97%;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-left: 1rem;
+    margin-bottom: 2rem;
+}
+
+.candidatePhoto {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid #ddd;
+}
+
+.candidatePhoto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.electionTitle {
+    color: #2d3748;
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: space-between;
+    background: #f8fafc;
+    align-items: center;
+    background: none;
+    padding: 0.3rem;
+}
+
+.electionDates {
+    font-size: 0.9rem;
+    color: #718096;
+    font-weight: normal;
+}
+
+.positionHeader td {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #2d3748;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 12px 20px;
+}
+
+.voterListContainerTable .approveIcon,
+.candidateListContainerTable .approveIcon,
+.electionListContainerTable #edit {
+    color: rgb(6, 223, 6);
+    font-size: 1.3rem;
+    transition: color 0.2s ease;
+}
+
+.voterListContainerTable .declineIcon,
+.candidateListContainerTable .declineIcon {
+    color: red;
+    font-size: 1.3rem;
+    transition: color 0.2s ease;
+}
+
+/* Tooltip Styles */
+.tooltipContainer {
+    position: relative;
+    display: inline-block;
+    margin: 0 8px;
+    cursor: pointer;
+}
+
+.tooltipText {
+    visibility: hidden;
+    width: 80px;
+    background-color: #2d3748;
+    color: #fff;
+    text-align: center;
+    border-radius: 4px;
+    padding: 4px 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-size: 0.8rem;
+}
+
+.tooltipText::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #2d3748 transparent transparent transparent;
+}
+
+.tooltipContainer:hover .tooltipText {
+    visibility: visible;
+    opacity: 1;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: none !important;
+}
+
+th, td {
+    padding: 12px 20px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+    background: lightgray !important;
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+td {
+    color: #4b5563;
+    font-size: 0.9rem;
+    background-color: #F3F4F6;
+}
+
+tr {
+    transition: background-color 0.2s;
+}
+
+td:last-child i {
+    color: #6b7280;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+table .startDate{
+    color: rgb(0, 200, 0);
+}
+
+table .duration{
+    color: red;
+}
+
+table .candidPos{
+    color: rgb(0, 200, 0);
+}
+
+.voterListContainerTable tr:hover td,
+.candidateListContainerTable tr:hover td,
+.electionListContainerTable tr:hover td {
+    background-color: #f8fafc;
+}
+
+/* CreateNewElectionsBtn */
+.createNewElectionsContainer,
+.exportResultsContainer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.createNewElectionsContainerBtn,
+.exportResultsContainerBtn {
+    background-color: #10b981;
+    color: white;
+    border-radius: 6px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-right: 1rem;
+}
+
+.createNewElectionsContainerBtn:hover,
+.exportResultsContainerBtn:hover {
+    background-color: #059669;
+}
+
+.createNewElectionsContainer i,
+.exportResultsContainer i {
+    margin-right: 8px;
+    font-size: 1.2rem;
+}
+
+.createNewElectionsBtn,
+.exportResultsBtn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/*chartsContainer*/
+.chartsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 0 1rem;
+}
+
+.chartCard canvas {
+    background: #F3F4F6;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    flex: 1;
+    width: 100% !important;
+    height: 250px !important;
+}
+
+/* status styles */
+.status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.upcoming {
+    background-color: #f0ad4e;
+    color: white;
+}
+
+.active {
+    background-color: #5cb85c;
+    color: white;
+}
+
+.completed {
+    background-color: #d9534f;
+    color: white;
+}
+
+/* Empty message styling */
+.emptyMessage {
+    padding-top: 2px;
+    text-align: center;
+    font-style: italic;
+    color: #000;
+}
+
+.adminActionInstruction{
+    font-style: italic;
+    color: red;
+    font-size: 1rem;
+}
+
+.voterListContainerHeading{
+    justify-content: space-between !important;
+}
+
+/* Notification Bell Styles */
+.notificationBell {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notificationCounter {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.notificationTooltip {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #6b7280;
+    color: #f9f9f9;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    white-space: nowrap;
+    z-index: 1000;
+    margin-top: 8px;
+    animation: tooltipFade 0.2s ease-out;
+    opacity: 70%;
+}
+
+@keyframes tooltipFade {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* New Request Indicator */
+.newRequestIndicator {
+    position: relative;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #ff4757;
+    border-radius: 50%;
+    margin-left: 8px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(0.95); }
+}
+
+/* Results Tables */
+.resultsTablesContainer {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 2rem 1rem;
+}
+
+.resultsTableHeading {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 0.5rem;
+}
+
+.positionTableWrapper {
+    margin-bottom: 2rem;
+}
+
+.positionTitle {
+    color: #34495e;
+    font-size: 1.1rem;
+    margin: 1rem 0;
+    padding-left: 0.5rem;
+}
+
+.resultsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+.resultsTable th {
+    background: #f8f9fa;
+    color: #2c3e50;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.resultsTable td {
+    padding: 12px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.resultsTable tr:hover {
+    background-color: #f8f9fa;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 100%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+.loaderContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 500px;
+}
+
+.downloadIcon {
+    font-size: 4rem;
+    background: linear-gradient(to bottom, #6366f1 50%, #e0e0e0 50%);
+    background-size: 100% 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: pour 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes pour {
+    0% {
+        background-position: 0% 100%;
+    }
+    50% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 0% 100%;
+    }
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 3px solid rgb(6, 223, 6);
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Disable buttons during loading */
+button:disabled, .bx[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.votedYes {
+    color: #4CAF50;
+    font-weight: 500;
+}
+
+.votedNo {
+    color: #f44336;
+    font-weight: 500;
+}

@@ -1,0 +1,211 @@
+.mainContainer {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: linear-gradient(
+            rgba(255, 255, 255, 0.15),
+            rgba(255, 255, 255, 1)
+    ), url(bg.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+
+    @media (max-width: 1200px) {
+        background-image: var(--mobile-gradient);
+        background-attachment: fixed;
+        padding: var(--base-padding);
+    }
+}
+
+.formContainer {
+    background: var(--form-bg);
+    padding: var(--base-padding);
+    border-radius: var(--rounded-lg);
+    box-shadow: var(--base-shadow);
+    width: 100%;
+    max-width: 400px;
+    opacity: 95%;
+}
+
+.statusImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusImage img {
+    width: 120px;
+    height: 120px;
+    image-rendering: auto;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.formHeading {
+    color: #1a365d;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.formInstruction {
+    color: #718096;
+    text-align: center;
+}
+
+.inputGroup {
+    position: relative;
+}
+
+.inputGroup i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+    font-size: 1.2rem;
+}
+
+.formInput {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    background: #F3F4F6;
+}
+
+.formInput:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
+.formButton {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    width: 100%;
+}
+
+.formButton:hover {
+    background: var(--accent-color);
+}
+
+.statusMessage {
+    background: #DEE1E6FF;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    opacity: 95%;
+}
+
+.statusMessage h2 {
+    color: #2d3748;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.statusMessage p {
+    color: #718096;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #3b82f6;
+}
+
+.successMessage {
+    color: #059669;
+    background: #f0fdf4;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.errorMessage {
+    color: #dc2626;
+    background: #fef2f2;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.countdown{
+    font-weight: 900;
+    font-size: 2rem;
+    color: #dc2626;
+}
+
+@media (max-width: 480px) {
+    .mainContainer {
+        .mainContainer {
+            background-image: var(--mobile-gradient);
+            background-size: 400% 400%;
+            background-color: #f8fafc;
+        }
+    }
+
+    .formContainer {
+        padding: var(--base-padding);
+        margin: var(--base-padding);
+        box-shadow: var(--elevated-shadow);
+        background: var(--form-bg);
+        border-radius: var(--rounded-lg);
+    }
+
+    .formHeading {
+        font-size: 1.75rem;
+        margin-bottom: var(--base-padding);
+        color: var(--heading-color);
+    }
+}
+
+:root {
+    /* Color Palette */
+    --primary-color: #4299e1;
+    --secondary-color: #63b3ed;
+    --accent-color: #3182ce;
+    --form-bg: #DEE1E6FF;
+    --heading-color: #1a365d;
+    --text-color: #718096;
+    --error-color: #dc2626;
+    --success-color: #059669;
+
+    /* Gradients */
+    --mobile-gradient:
+            linear-gradient(to bottom right, #7f99e0, #ebafaf);
+
+    --desktop-overlay: linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.15));
+
+    /* Spacing */
+    --base-padding: 1rem;
+    --large-padding: 2rem;
+
+    /* Shadows */
+    --base-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --elevated-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+
+    /* Border Radius */
+    --rounded: 0.5rem;
+    --rounded-lg: 1rem;
+}

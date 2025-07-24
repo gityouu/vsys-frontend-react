@@ -1,0 +1,205 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body{
+    min-height: 100vh;
+}
+
+.main {
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image: linear-gradient(
+            rgba(255, 255, 255, 0.15),
+            rgba(255, 255, 255, 1)
+    ), url(logo.png);
+    background-repeat: no-repeat;
+    background-size: 80%;
+    background-position: center center;
+    background-attachment: fixed;
+
+    @media screen and (max-width: 1200px) {
+        background: none;
+    }
+}
+
+.loginContainer {
+    background: #DEE1E6FF;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    opacity: 98%;
+}
+
+.formHeader {
+    text-align: center;
+    color: #2c3e50;
+    font-size: 1.9rem;
+}
+
+.formInstruction {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #7f8c8d;
+}
+
+.formContainerFields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+}
+
+.inputGroup {
+    position: relative;
+}
+
+.inputGroup i {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: #7f8c8d;
+}
+
+.inputGroup i:first-child {
+    left: 15px;
+}
+
+.inputGroup i:last-child {
+    left: auto;
+    right: 15px;
+    cursor: pointer;
+}
+
+.inputGroup input {
+    width: 100%;
+    padding: 10px 40px;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+.formContainerFields input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.formContainerFields input {
+    width: 100%;
+    padding: 10px 10px 10px 38px;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+.formContainerFields input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.formLogInBtn {
+    background: #3498db;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.formLogInBtn:hover {
+    background: #2980b9;
+}
+
+.loginContainer a {
+    display: block;
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #3498db;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.loginContainer a:hover {
+    text-decoration: underline;
+}
+
+.errorMessage {
+    color: #dc3545;
+    font-size: 0.9rem;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    /* gap: 5px; */
+}
+
+.errorMessage .errorIcon {
+    font-size: 1.1rem;
+}
+
+.formLogInBtn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 480px) {
+    .main{
+        background: none;
+    }
+
+    .loginContainer {
+        padding: 1.2rem;
+        margin: 0 0.5rem;
+    }
+
+    .formContainerFields i {
+        left: 12px;
+        font-size: 0.9rem;
+    }
+
+    .formContainerFields input {
+        padding-left: 34px;
+        height: 42px;
+    }
+
+    .formLogInBtn {
+        padding: 10px;
+    }
+
+    .loginContainer a {
+        font-size: 0.85rem;
+    }
+}
+
+@media screen and (max-width: 360px) {
+    .main{
+        background: none;
+    }
+
+    .formHeader {
+        font-size: 1.3rem;
+    }
+
+    .formInstruction {
+        font-size: 0.75rem;
+    }
+
+    .formContainerFields input {
+        font-size: 0.8rem;
+    }
+}

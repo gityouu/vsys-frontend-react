@@ -857,3 +857,11 @@ button:disabled, .bx[disabled] {
     color: #f44336;
     font-weight: 500;
 }
+
+.viewingOneElectionNote {
+    font-size: 0.8em;
+    color: #666;
+    margin-left: 10px;
+    font-weight: normal;
+    vertical-align: middle;
+}

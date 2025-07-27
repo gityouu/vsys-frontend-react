@@ -200,10 +200,16 @@ const Dashboard = () => {
             setPendingRegistrations(prev => 
                 prev.filter(reg => reg.id !== registrationId)
             );
-            
-            await fetch(`${process.env.REACT_APP_API_BASE_URL}/voter/registrations/${registrationId}/approved`, {
-            method: 'PATCH'
+
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/voter/registrations/${registrationId}/approved`, {
+                method: 'PATCH'
             });
+
+            // Check for HTTP errors
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Approval failed');
+    }
 
             // Only refetch after successful API call
             await fetchRegistrations('pending');
@@ -1431,13 +1437,22 @@ const Dashboard = () => {
                                 <section className={styles.candidaterListContainer}>
                                     <h2 className={styles.candidateListContainerHeading}>
                                         <i className="bx bx-group">Candidates List</i>
+                                        {selectedElectionId && (
+                                            <span className={styles.viewingOneElectionNote}>
+                                                (Viewing only: {elections.find(e => e.id === selectedElectionId)?.title})
+                                            </span>
+                                        )}
                                     </h2>
                                     {/* Check if any candidates exist in all elections */}
                                     {(() => {
                                         const q = searchQuery.trim().toLowerCase();
 
+                                        const electionsToDisplay = selectedElectionId
+                                            ? elections.filter(e => e.id === selectedElectionId)
+                                            : elections;
+
                                         // 1) is there any candidate in any election matching the query?
-                                        const anyMatch = elections.some(election =>
+                                        const anyMatch = electionsToDisplay.some(election => 
                                             (election.candidates || []).some(candidate =>
                                                 candidate.name.toLowerCase().includes(q) ||
                                                 candidate.position.toLowerCase().includes(q)
@@ -1455,7 +1470,7 @@ const Dashboard = () => {
                                         }
 
                                         // 3) otherwise render each election with its filtered candidates
-                                        return elections.map(election => {
+                                        return electionsToDisplay.map(election => {
                                             const filteredCandidates = (election.candidates || []).filter(candidate =>
                                                 candidate.name.toLowerCase().includes(q) ||
                                                 candidate.position.toLowerCase().includes(q)

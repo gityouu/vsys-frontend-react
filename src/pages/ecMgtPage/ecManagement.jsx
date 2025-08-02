@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import styles from './ecManagement.module.css';
 
 const ECManagement = () => {
@@ -14,6 +16,25 @@ const ECManagement = () => {
     const [loading, setLoading] = useState(false);
     const [deleteCandidate, setDeleteCandidate] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [auditTrails, setAuditTrails] = useState([]);
+    const [elections, setElections] = useState([]);
+    const [auditLoading, setAuditLoading] = useState(false);
+    const [globalActions, setGlobalActions] = useState([]);
+
+    // Action types for display
+    const ACTION_TYPES = {
+        EC_LOGIN: 'EC Login',
+        EC_LOGOUT: 'EC Logout',
+        REGISTRATION_APPROVED: 'Registration Approved',
+        REGISTRATION_REJECTED: 'Registration Rejected',
+        ELECTION_CREATED: 'Election Created',
+        VOTER_REGISTERED: 'Voter Registered',
+        VOTER_VOTED: 'Voter Voted',
+        ELECTION_RESULTS_EXPORTED: 'Election Results Exported',
+        ELECTION_VIEWED: 'Election Viewed',
+        EC_MEMBER_CREATED: 'EC Member Created',
+        EC_MEMBER_DELETED: 'EC Member Deleted'
+    };
 
     // Fetch existing EC members
     useEffect(() => {
@@ -29,6 +50,38 @@ const ECManagement = () => {
             }
         };
         fetchMembers();
+    }, []);
+
+    // Fetch elections and audit trails
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch elections
+                const electionsResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}/elections`);
+                if (!electionsResponse.ok) throw new Error('Failed to fetch elections');
+                const electionsData = await electionsResponse.json();
+                setElections(electionsData);
+                
+                // Fetch all audit trails
+                setAuditLoading(true);
+                const auditResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}/audit`);
+                if (!auditResponse.ok) throw new Error('Failed to fetch audit trails');
+                const auditData = await auditResponse.json();
+
+                // Separate global actions (no electionId)
+                const global = auditData.filter(trail => !trail.election_id);
+                const electionSpecific = auditData.filter(trail => trail.election_id);
+
+                setAuditTrails(electionSpecific);
+                setGlobalActions(global);
+            } catch (error) {
+                toast.error('Failed to load data');
+                console.error('Fetch error:', error);
+            } finally {
+                setAuditLoading(false);
+            }
+        };
+        fetchData();
     }, []);
 
     // Generate random credentials
@@ -47,14 +100,12 @@ const ECManagement = () => {
         setLoading(true);
         
         try {
-            // Validate empty fields first
             if (!formData.name.trim() || !formData.role) {
                 toast.error('Please fill all required fields');
                 setLoading(false);
                 return;
             }
 
-            // Client-side role uniqueness check
             const roleAlreadyExists = members.some(member => 
                 member.role === formData.role
             );
@@ -65,7 +116,6 @@ const ECManagement = () => {
                 return;
             }
 
-            // Server request
             const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/ec-members`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -78,10 +128,9 @@ const ECManagement = () => {
             }
 
             const newMember = await response.json();
-            // Preserve generated password for display (not stored)
             setMembers(prev => [{
                 ...newMember,
-                password: formData.password // Temporary display
+                password: formData.password
             }, ...prev]);
             setFormData({ name: '', role: 'chairperson', pin: '', password: '' });
             toast.success('Member saved successfully');
@@ -115,11 +164,210 @@ const ECManagement = () => {
         }
     };
 
+    // helper function to safely format additional info
+    const getSafeAdditionalInfo = (trail) => {
+        if (!trail.additional_info) return '-';
+    
+        // Format date to be human-readable
+        const formatDate = (dateString) => {
+            if (!dateString) return 'Unknown';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch {
+                return dateString; // Fallback to original if parsing fails
+            }
+        };
+
+        // For EC_MEMBER_CREATED actions
+        if (trail.action === 'ec_member_created') {
+            const safeInfo = {...trail.additional_info};
+            if (safeInfo.newMember) {
+                const {id, pin, password, created_at, ...safeNewMember} = safeInfo.newMember;
+                safeInfo.newMember = {
+                    ...safeNewMember,
+                    created_at: formatDate(created_at) // Format the date
+                };
+            }
+            return Object.keys(safeInfo).length > 0 
+            ? JSON.stringify(safeInfo, null, 2) // Pretty print with 2-space indentation
+            : '-';
+        }
+
+        // For EC_MEMBER_DELETED actions
+        if (trail.action === 'ec_member_deleted') {
+            const safeInfo = {...trail.additional_info};
+            if (safeInfo.deletedMember) {
+                const {id, pin, password, created_at, ...safeDeletedMember} = safeInfo.deletedMember;
+                safeInfo.deletedMember = {
+                    ...safeDeletedMember,
+                    created_at: formatDate(created_at) // Format the date
+                };
+            }
+            return Object.keys(safeInfo).length > 0 
+            ? JSON.stringify(safeInfo, null, 2)
+            : '-';
+        }
+
+        return JSON.stringify(trail.additional_info, null, 2);
+    };
+
+    // Generate PDF for a specific election's audit trails
+    const generateElectionPDF = (electionId) => {
+        const election = elections.find(e => e.id === electionId);
+        if (!election) return;
+    
+        const electionTrails = auditTrails.filter(trail => trail.election_id === electionId);
+        if (electionTrails.length === 0) {
+            toast.info('No audit trails found for this election');
+            return;
+        }
+
+        // Sort trails by time (newest first) - THIS WAS MISSING
+        const sortedTrails = [...electionTrails].sort((a, b) => 
+            new Date(b.event_time) - new Date(a.event_time)
+        );
+
+        const doc = new jsPDF();
+        const title = `Audit Report for ${election.title}`;
+    
+        // Determine report type
+        const now = new Date();
+        const startDate = new Date(election.start_time);
+        const endDate = new Date(election.end_time);
+        
+        let watermarkText = '';
+        if (now < startDate) {
+            watermarkText = 'PRE-ELECTION AUDIT REPORT';
+        } else if (now > endDate) {
+            watermarkText = 'POST-ELECTION AUDIT REPORT';
+        } else {
+            watermarkText = 'ELECTION IN PROGRESS AUDIT REPORT';
+        }
+
+        // Add watermark function
+        const addWatermark = (doc) => {
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                
+                // Set watermark properties
+                doc.setTextColor(200, 200, 200);
+                doc.setFontSize(30);
+                doc.setFont("Patrick-hand", "bold");
+                
+                // Get page dimensions
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                
+                // Calculate centered position
+                const textWidth = doc.getStringUnitWidth(watermarkText) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                const x = (pageWidth - textWidth) / 2;
+                const y = pageHeight / 2;
+                
+                // Draw watermark
+                doc.text(watermarkText, x, y);
+            }
+        };
+
+        // Main content
+        doc.setFontSize(16);
+        doc.text(title, 14, 20);
+        
+        const tableData = sortedTrails.map(trail => [
+            new Date(trail.event_time).toLocaleString(),
+            ACTION_TYPES[trail.action] || trail.action,
+            trail.ec_member_name || '-',
+            trail.voter_email || '-',
+            getSafeAdditionalInfo(trail)
+        ]);
+
+        autoTable(doc, {
+            head: [['Time', 'Action', 'EC Member', 'Voter Email', 'Additional Info']],
+            body: tableData,
+            startY: 30,
+            styles: { fontSize: 8 },
+            headStyles: { fillColor: [41, 128, 185] },
+            didDrawPage: () => {
+            addWatermark(doc);
+            }
+        });
+
+        doc.save(`${title.replace(/\s+/g, '_')}.pdf`);
+    };
+
+    const generateGlobalPDF = () => {
+        if (globalActions.length === 0) {
+            toast.info('No system-wide actions found');
+            return;
+        }
+    
+        // Sort trails by time (newest first)
+        const sortedTrails = [...globalActions].sort((a, b) => 
+            new Date(b.event_time) - new Date(a.event_time)
+        );
+    
+        const doc = new jsPDF();
+        const title = `System-Wide Audit Report`;
+    
+        doc.setFontSize(16);
+        doc.text(title, 14, 20);
+    
+        const tableData = sortedTrails.map(trail => [
+            new Date(trail.event_time).toLocaleString(),
+            ACTION_TYPES[trail.action] || trail.action,
+            trail.ec_member_name || '-',
+            trail.voter_email || '-',
+            getSafeAdditionalInfo(trail)  //safe helper function to format additional info
+        ]);
+
+        autoTable(doc, {
+            head: [['Time', 'Action', 'EC Member', 'Voter Email', 'Additional Info']],
+            body: tableData,
+            startY: 30,
+            styles: { fontSize: 8 },
+            headStyles: { fillColor: [41, 128, 185] }
+        });
+
+        doc.save('System_Wide_Audit_Report.pdf');
+    };
+
+    // Get last action time for an election
+    const getLastActionTime = (electionId) => {
+        const electionTrails = auditTrails.filter(trail => trail.election_id === electionId);
+        if (electionTrails.length === 0) return 'No actions';
+        
+        const latest = electionTrails.reduce((latestTrail, currentTrail) => {
+            const currentTime = new Date(currentTrail.event_time);
+            return currentTime > new Date(latestTrail.event_time) ? currentTrail : latestTrail;
+        }, electionTrails[0]);
+        
+        return new Date(latest.event_time).toLocaleString();
+    };
+
+    // Get unique elections from audit trails
+    const getUniqueElections = () => {
+        const uniqueElectionIds = [...new Set(auditTrails.map(trail => trail.election_id))];
+        return uniqueElectionIds.map(id => {
+            const election = elections.find(e => e.id === id);
+            return {
+                id,
+                title: election?.title || `Election ${id.substring(0, 8)}`,
+                lastActionTime: getLastActionTime(id)
+            };
+        });
+    };
+
     return (
         <>
             <h1 className={styles.heading}>For I.T personnel use only</h1>
             <main className={styles.main}>
-                {/* ToastContainer */}
                 <ToastContainer
                     position="top-right"
                     autoClose={5000}
@@ -246,6 +494,67 @@ const ECManagement = () => {
 
                 <div className={styles.auditContainer}>
                     <h2 className={styles.text}>Audit Trails</h2>
+                    {/* Add Global Actions Section */}
+                    <div className={styles.globalActionsSection}>
+                    <h3>System-Wide Actions</h3>
+                        <button 
+                            onClick={generateGlobalPDF}
+                            className={styles.downloadBtn}
+                            disabled={globalActions.length === 0}
+                        >
+                            Download Global PDF
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                            </svg>
+                        </button>
+                    <p>Actions: {globalActions.length}</p>
+                    </div>
+                    <div className={styles.tableWrapper}>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Election Title</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {auditLoading ? (
+                                    <tr>
+                                        <td colSpan="3" className={styles.noMembers}>
+                                            Loading audit trails...
+                                        </td>
+                                    </tr>
+                                ) : getUniqueElections().length === 0 ? (
+                                    <tr>
+                                        <td colSpan="3" className={styles.noMembers}>
+                                            No audit trails found
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    getUniqueElections().map(election => (
+                                        <tr key={election.id}>
+                                            <td>{election.lastActionTime}</td>
+                                            <td>{election.title}</td>
+                                            <td>
+                                                <button 
+                                                    onClick={() => generateElectionPDF(election.id)}
+                                                    className={styles.downloadBtn}
+                                                >
+                                                    Download PDF
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </main>
         </>

@@ -264,3 +264,102 @@ tr:hover {
     border-radius: 4px;
     text-align: center;
 }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main {
+    flex-direction: column;
+  }
+  
+  .formContainer,
+  .auditContainer {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+/* Enhance table appearance */
+.auditContainer table th,
+.auditContainer table td {
+  padding: 0.8rem;
+  font-size: 0.9rem;
+}
+
+.auditContainer table th {
+  background: #2c3e50;
+  color: white;
+}
+
+.auditContainer table tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.auditContainer .noMembers {
+  padding: 1.5rem;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+
+/* Add to ecManagement.module.css */
+.downloadBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 14px;
+}
+
+.downloadBtn:hover {
+  background: #2980b9;
+}
+
+.downloadBtn svg {
+  margin-bottom: -2px;
+}
+
+/* Add this to make each election appear only once */
+tr:not(:first-child) {
+  border-top: 1px solid #eee;
+}
+
+/* Remove alternating row colors for this table */
+.auditContainer table tr:nth-child(even) {
+  background-color: transparent;
+}
+
+/* Add subtle hover effect */
+.auditContainer table tr:hover {
+  background-color: #f5f9fc;
+}
+
+/* ecManagement.module.css */
+.globalActionsSection {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.globalActionsSection h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #343a40;
+}
+
+.globalActionsSection p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+}

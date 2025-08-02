@@ -205,11 +205,10 @@ const Dashboard = () => {
                 method: 'PATCH'
             });
 
-            // Check for HTTP errors
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Approval failed');
-    }
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Approval failed');
+            }
 
             // Only refetch after successful API call
             await fetchRegistrations('pending');
@@ -222,7 +221,7 @@ const Dashboard = () => {
             await logAuditEvent({
                 action: 'registration_approved',
                 actorType: 'ec_member',
-                ecMemberName: sessionStorage.getItem('ecAdminName') || 'Admin',
+                ecMemberName: sessionStorage.getItem('ecAdminName'),
                 electionId: registration.electionId,
                 electionTitle: registration.electionTitle,
                 voterEmail: registration.email
@@ -946,31 +945,36 @@ const Dashboard = () => {
         };
     }, []);
 
-    //handle auto logout after 30mins
+    //handle auto logout
     useEffect(() => {
         let inactivityTimer;
-  
+
         const resetTimer = () => {
             clearTimeout(inactivityTimer);
             inactivityTimer = setTimeout(() => {
-                toast.info('Session expired due to inactivity');
-                handleLogout();
-            }, 30 * 60 * 1000); // 30 minutes
+            toast.info('Session expired due to inactivity');
+            handleLogout();
+            }, 4 * 60 * 60 * 1000); // 4 hours of inactivity
         };
-  
-        // Set up event listeners
+
         window.addEventListener('mousemove', resetTimer);
         window.addEventListener('keypress', resetTimer);
-  
-        // Start the timer
-        resetTimer();
-  
+        resetTimer(); // Initialize timer
+
         return () => {
             clearTimeout(inactivityTimer);
             window.removeEventListener('mousemove', resetTimer);
             window.removeEventListener('keypress', resetTimer);
         };
     }, [handleLogout]);
+
+    //check on initial load
+    useEffect(() => {
+        if (!sessionStorage.getItem('ecAdminName')) {
+            navigate('/');
+            toast.error('Please log in');
+        }
+    }, [navigate]);
 
     return (
         <>

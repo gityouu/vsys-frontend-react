@@ -4,6 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import styles from './ecManagement.module.css';
+import 'boxicons/css/boxicons.min.css';
 
 const ECManagement = () => {
     const [members, setMembers] = useState([]);
@@ -20,6 +21,7 @@ const ECManagement = () => {
     const [elections, setElections] = useState([]);
     const [auditLoading, setAuditLoading] = useState(false);
     const [globalActions, setGlobalActions] = useState([]);
+    const [passwordVisibility, setPasswordVisibility] = useState({});
 
     // Action types for display
     const ACTION_TYPES = {
@@ -41,9 +43,17 @@ const ECManagement = () => {
         const fetchMembers = async () => {
             try {
                 const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/ec-members`);
+
                 if (!response.ok) throw new Error('Failed to fetch members');
                 const data = await response.json();
                 setMembers(data);
+
+                // Initialize password visibility state
+                const visibilityState = {};
+                data.forEach(member => {
+                    visibilityState[member.id] = false;
+                });
+                setPasswordVisibility(visibilityState);
             } catch (error) {
                 toast.error('Failed to load members');
                 console.error('Fetch error:', error);
@@ -132,6 +142,13 @@ const ECManagement = () => {
                 ...newMember,
                 password: formData.password
             }, ...prev]);
+
+            // Set password visibility for new member
+            setPasswordVisibility(prev => ({
+                ...prev,
+                [newMember.id]: false
+            }));
+
             setFormData({ name: '', role: 'chairperson', pin: '', password: '' });
             toast.success('Member saved successfully');
 
@@ -140,6 +157,14 @@ const ECManagement = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Toggle password visibility for a specific member
+    const togglePasswordVisibility = (memberId) => {
+        setPasswordVisibility(prev => ({
+            ...prev,
+            [memberId] : !prev[memberId]
+        }));
     };
 
     const confirmDelete = async () => {
@@ -185,7 +210,7 @@ const ECManagement = () => {
             }
         };
 
-        // For EC_MEMBER_CREATED actions
+        //  EC_MEMBER_CREATED actions
         if (trail.action === 'ec_member_created') {
             const safeInfo = {...trail.additional_info};
             if (safeInfo.newMember) {
@@ -196,11 +221,11 @@ const ECManagement = () => {
                 };
             }
             return Object.keys(safeInfo).length > 0 
-            ? JSON.stringify(safeInfo, null, 2) // Pretty print with 2-space indentation
+            ? JSON.stringify(safeInfo, null, 2) // print with 2-space indentation
             : '-';
         }
 
-        // For EC_MEMBER_DELETED actions
+        //  EC_MEMBER_DELETED actions
         if (trail.action === 'ec_member_deleted') {
             const safeInfo = {...trail.additional_info};
             if (safeInfo.deletedMember) {
@@ -465,7 +490,21 @@ const ECManagement = () => {
                                         <td>{member.name}</td>
                                         <td>{member.role}</td>
                                         <td>{member.pin}</td>
-                                        <td>{member.password}</td>
+                                        <td>
+                                            {passwordVisibility[member.id] ? 
+                                                member.password : 
+                                                '••••••'
+                                            }
+                                            <span
+                                                onClick={() => togglePasswordVisibility(member.id)}
+                                            >
+                                                {passwordVisibility[member.id] ? (
+                                                    <i class='bx bxs-show' style={{ cursor: 'pointer' }}></i>
+                                                ) : (
+                                                    <i class='bx bxs-hide' style={{ cursor: 'pointer' }}></i>
+                                                )}
+                                            </span>
+                                        </td>
                                         <td>
                                             <button
                                                 onClick={() => {
@@ -494,7 +533,7 @@ const ECManagement = () => {
 
                 <div className={styles.auditContainer}>
                     <h2 className={styles.text}>Audit Trails</h2>
-                    {/* Add Global Actions Section */}
+                    {/*Global Actions Section */}
                     <div className={styles.globalActionsSection}>
                     <h3>System-Wide Actions</h3>
                         <button 
@@ -503,10 +542,7 @@ const ECManagement = () => {
                             disabled={globalActions.length === 0}
                         >
                             Download Global PDF
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-                            </svg>
+                            <i class='bx bx-download'></i>
                         </button>
                     <p>Actions: {globalActions.length}</p>
                     </div>
@@ -543,10 +579,7 @@ const ECManagement = () => {
                                                     className={styles.downloadBtn}
                                                 >
                                                     Download PDF
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                                                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-                                                    </svg>
+                                                    <i class='bx bx-download'></i>
                                                 </button>
                                             </td>
                                         </tr>

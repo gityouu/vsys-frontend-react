@@ -38,7 +38,7 @@ const VoterRegister = () => {
                     endTime: new Date(data.end_time)
                 });
             } catch (err) {
-                setError(err.message);
+                navigate('/notFound');
             } finally {
                 setLoading(false);
             }
@@ -196,10 +196,9 @@ const VoterRegister = () => {
             <div className={styles.loading}>Loading...</div>
         </main>;
 
-    if (error)
-        return <main className={styles.mainContainer}>
-            <div className={styles.errorMessage}><h2>Error</h2><p>{error}</p></div>
-        </main>;
+    if (error){
+        navigate('/notFound');
+    }
 
     const registrationStart = new Date(electionData.createdAt);
     registrationStart.setMinutes(registrationStart.getMinutes() + 15);
@@ -282,7 +281,8 @@ const VoterRegister = () => {
                                 />
                             </div>
                             <h2>Registration Closed</h2>
-                            <p>The registration period has ended. You can no longer register for this election.</p>
+                            <p>The registration period has ended. 
+                            You can no longer register for this election.</p>
                         </div>
                     )}
                     {status === 'ended' && (

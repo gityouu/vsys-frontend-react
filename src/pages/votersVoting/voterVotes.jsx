@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from 'react-router-dom';
 import styles from './voterVotes.module.css';
+import { useNavigate } from 'react-router-dom';
 
 
 const VoterVotes = () => {
+    const navigate = useNavigate();
+
     const [searchParams] = useSearchParams();
     const electionId = searchParams.get('electionId');
 
@@ -42,7 +45,9 @@ const VoterVotes = () => {
                 setVotes(votesData.map(vote => vote.candidate_id));
 
             } catch (err) {
-                setError(err.message);
+                if (err.message.includes(err.message) || err.message.includes('Invalid')) {
+                    navigate('/notFound');
+                }
             } finally {
                 setLoading(false);
             }

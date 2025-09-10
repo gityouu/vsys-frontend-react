@@ -47,7 +47,7 @@ const CreateElections = () => {
         startTime: '',
         endTime: '',
         description: '',
-        autoDelete: false,
+        useCustomDeleteDays: false,
         deleteAfterDays: 30,
     });
 
@@ -213,10 +213,10 @@ const CreateElections = () => {
     };
 
     // function to handle the auto-delete toggle toggle
-    const handleAutoDeleteToggle = () => {
+    const handleCustomDeleteToggle = () => {
         setElectionInfo(prev => ({
             ...prev,
-            autoDelete: !prev.autoDelete
+            useCustomDeleteDays: !prev.useCustomDeleteDays
         }));
     };
 
@@ -410,8 +410,7 @@ const CreateElections = () => {
                 status: electionInfo.status,
                 start_time: electionInfo.startTime,
                 end_time: electionInfo.endTime,
-                auto_delete: electionInfo.autoDelete,
-                delete_after_days: electionInfo.autoDelete ? electionInfo.deleteAfterDays : null,
+                delete_after_days: electionInfo.useCustomDeleteDays ? electionInfo.deleteAfterDays : 30,
                 description: electionInfo.description,
                 candidates: candidatesWithUrls.map(candidate => ({
                     name: candidate.name.trim(),
@@ -446,7 +445,8 @@ const CreateElections = () => {
                     positions: parseInt(electionInfo.positions, 10),
                     type: electionInfo.type,
                     max_votes: parseInt(electionInfo.maxVotes, 10),
-                    candidateCount: candidates.length
+                    candidateCount: candidates.length,
+                    delete_after_days: electionInfo.useCustomDeleteDays ? electionInfo.deleteAfterDays : 30
                 }
             });
 
@@ -606,10 +606,11 @@ const CreateElections = () => {
                         </div>
                         <div className={styles.textbox5}>
                             <div className={styles.switchLayout}>
-                                <label>Auto-delete election after end date</label>
+                                <label>Extend deletion period beyond 30 days</label>
                                 <div 
-                                    className={`${styles.toggleSwitch} ${electionInfo.autoDelete ? styles.active : ''}`}
-                                    onClick={handleAutoDeleteToggle}
+                                    className={`${styles.toggleSwitch} ${electionInfo.useCustomDeleteDays ? styles.active : ''}`}
+                                    onClick={handleCustomDeleteToggle}
+                                    title='toggle'
                                 >
                                     <div className={styles.toggleKnob}></div>
                                 </div>
@@ -621,7 +622,7 @@ const CreateElections = () => {
                                     min="30"
                                     value={electionInfo.deleteAfterDays}
                                     onChange={handleDeleteDaysChange}
-                                    disabled={!electionInfo.autoDelete}
+                                    disabled={!electionInfo.useCustomDeleteDays}
                                 />
                             </div>
                         </div>
@@ -851,14 +852,14 @@ const CreateElections = () => {
                                 <div className={styles.summaryItem}>
                                     <span className={styles.summaryLabel}>Start Time:</span>
                                     <span className={styles.summaryValue}>
-                    {new Date(electionInfo.startTime).toLocaleString()}
-                  </span>
+                                        {new Date(electionInfo.startTime).toLocaleString()}
+                                    </span>
                                 </div>
                                 <div className={styles.summaryItem}>
                                     <span className={styles.summaryLabel}>End Time:</span>
                                     <span className={styles.summaryValue}>
-                    {new Date(electionInfo.endTime).toLocaleString()}
-                  </span>
+                                        {new Date(electionInfo.endTime).toLocaleString()}
+                                    </span>
                                 </div>
                                 <div className={styles.summaryItem}>
                                     <span className={styles.summaryLabel}>Max Votes:</span>
@@ -871,6 +872,10 @@ const CreateElections = () => {
                                 <div className={styles.summaryItem}>
                                     <span className={styles.summaryLabel}>Description:</span>
                                     <span className={styles.summaryValue}>{electionInfo.description}</span>
+                                </div>
+                                <div className={styles.summaryItem}>
+                                    <span className={styles.summaryLabel}>Auto-Delete After:</span>
+                                    <span className={styles.summaryValue}>{electionInfo.deleteAfterDays} days</span>
                                 </div>
                             </div>
                         </div>

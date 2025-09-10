@@ -15,7 +15,7 @@ const CreateElections = () => {
     const logAuditEvent = async (auditData) => {
         try {
             // Get admin name from session storage
-            const adminName = sessionStorage.getItem('ecAdminName') || 'Admin';
+            const adminName = sessionStorage.getItem('ecAdminName');
             
             const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/audit`, {
                 method: 'POST',
@@ -47,6 +47,8 @@ const CreateElections = () => {
         startTime: '',
         endTime: '',
         description: '',
+        autoDelete: false,
+        deleteAfterDays: 30,
     });
 
     // Candidate form state and list of candidates
@@ -208,6 +210,23 @@ const CreateElections = () => {
 
         setFieldErrors(prev => ({ ...prev, ...errors }));
         return isValid;
+    };
+
+    // function to handle the auto-delete toggle toggle
+    const handleAutoDeleteToggle = () => {
+        setElectionInfo(prev => ({
+            ...prev,
+            autoDelete: !prev.autoDelete
+        }));
+    };
+
+    // function to handle the auto-delete days input change
+    const handleDeleteDaysChange = (e) => {
+        const value = Math.max(30, parseInt(e.target.value) || 30);
+        setElectionInfo(prev => ({
+            ...prev,
+            deleteAfterDays: value
+        }));
     };
 
     // Submit election info: move to candidate addition if valid
@@ -391,6 +410,8 @@ const CreateElections = () => {
                 status: electionInfo.status,
                 start_time: electionInfo.startTime,
                 end_time: electionInfo.endTime,
+                auto_delete: electionInfo.autoDelete,
+                delete_after_days: electionInfo.autoDelete ? electionInfo.deleteAfterDays : null,
                 description: electionInfo.description,
                 candidates: candidatesWithUrls.map(candidate => ({
                     name: candidate.name.trim(),
@@ -582,6 +603,27 @@ const CreateElections = () => {
                             {fieldErrors.endTime && (
                                 <span className={styles.fieldError}>{fieldErrors.endTime}</span>
                             )}
+                        </div>
+                        <div className={styles.textbox5}>
+                            <div className={styles.switchLayout}>
+                                <label>Auto-delete election after end date</label>
+                                <div 
+                                    className={`${styles.toggleSwitch} ${electionInfo.autoDelete ? styles.active : ''}`}
+                                    onClick={handleAutoDeleteToggle}
+                                >
+                                    <div className={styles.toggleKnob}></div>
+                                </div>
+                            </div>
+                            <div className={styles.deleteDaysInput}>
+                                <label>Delete after (days)</label>
+                                <input
+                                    type="number"
+                                    min="30"
+                                    value={electionInfo.deleteAfterDays}
+                                    onChange={handleDeleteDaysChange}
+                                    disabled={!electionInfo.autoDelete}
+                                />
+                            </div>
                         </div>
                         <div className={styles.textarea}>
                             <label>Description</label>

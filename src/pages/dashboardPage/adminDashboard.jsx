@@ -114,12 +114,12 @@ const Dashboard = () => {
         return acc;
     }, { upcoming: 0, active: 0, completed: 0 });
 
-    // Calculate recent completed elections (within last 30 days)
+    // Calculate recent completed elections (within last 27 days)
     const recentCompleted = elections.filter(election => {
         const endTime = election.endTime instanceof Date ? 
             election.endTime : new Date(0);
         return election.status === 'completed' && 
-            endTime > new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            endTime > new Date(now.getTime() - 27 * 24 * 60 * 60 * 1000);
     }).length;
 
     //function to group candidates
@@ -931,44 +931,37 @@ const Dashboard = () => {
         }
     }, [navigate]);
 
-    // Handle session expiration
-    useEffect(() => {
-        const handleBeforeUnload = () => {
-            sessionStorage.removeItem('ecAdminName');
-            sessionStorage.removeItem('ecAdminRole');
-        };
-
-        window.addEventListener('beforeunload', handleBeforeUnload);
-    
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
-    }, []);
-
-    //handle auto logout
     useEffect(() => {
         let inactivityTimer;
 
         const resetTimer = () => {
             clearTimeout(inactivityTimer);
             inactivityTimer = setTimeout(() => {
-            toast.info('Session expired due to inactivity');
-            handleLogout();
-            }, 4 * 60 * 60 * 1000); // 4 hours of inactivity
+                toast.info('Session expired due to inactivity');
+                // Clear session storage and redirect
+                sessionStorage.removeItem('ecAdminName');
+                sessionStorage.removeItem('ecAdminRole');
+                navigate('/');
+            }, 30 * 60 * 1000); // 30 minutes of inactivity
         };
 
-        window.addEventListener('mousemove', resetTimer);
-        window.addEventListener('keypress', resetTimer);
+        // event listeners
+        const events = ['mousemove', 'keypress', 'click', 'scroll', 'touchstart'];
+        events.forEach(event => {
+            window.addEventListener(event, resetTimer);
+        });
+
         resetTimer(); // Initialize timer
 
         return () => {
             clearTimeout(inactivityTimer);
-            window.removeEventListener('mousemove', resetTimer);
-            window.removeEventListener('keypress', resetTimer);
+            events.forEach(event => {
+                window.removeEventListener(event, resetTimer);
+            });
         };
-    }, [handleLogout]);
+    }, [navigate]);
 
-    //check on initial load
+    // Check on initial load - KEEP THIS
     useEffect(() => {
         if (!sessionStorage.getItem('ecAdminName')) {
             navigate('/');

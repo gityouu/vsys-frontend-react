@@ -22,6 +22,7 @@ const ECManagement = () => {
     const [auditLoading, setAuditLoading] = useState(false);
     const [globalActions, setGlobalActions] = useState([]);
     const [passwordVisibility, setPasswordVisibility] = useState({});
+    const [refreshCounter, setRefreshCounter] = useState(0);
 
     // Action types for display
     const ACTION_TYPES = {
@@ -92,6 +93,15 @@ const ECManagement = () => {
             }
         };
         fetchData();
+    }, [refreshCounter]);
+
+    // time interval to trigger refreshes
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setRefreshCounter(prev => prev + 1);
+        }, 60000); // Update every 60 seconds
+
+        return () => clearInterval(interval); // Cleanup on unmount
     }, []);
 
     // Generate random credentials
@@ -347,13 +357,14 @@ const ECManagement = () => {
         const tableData = sortedTrails.map(trail => [
             new Date(trail.event_time).toLocaleString(),
             ACTION_TYPES[trail.action] || trail.action,
+            trail.actor_type || '-',
             trail.ec_member_name || '-',
             trail.voter_email || '-',
             getSafeAdditionalInfo(trail)  //safe helper function to format additional info
         ]);
 
         autoTable(doc, {
-            head: [['Time', 'Action', 'EC Member', 'Voter Email', 'Additional Info']],
+            head: [['Time', 'Action', 'Actor Type', 'EC Member', 'Voter Email', 'Additional Info']],
             body: tableData,
             startY: 30,
             styles: { fontSize: 8 },
@@ -499,9 +510,9 @@ const ECManagement = () => {
                                                 onClick={() => togglePasswordVisibility(member.id)}
                                             >
                                                 {passwordVisibility[member.id] ? (
-                                                    <i class='bx bxs-show' style={{ cursor: 'pointer' }}></i>
+                                                    <i className='bx bxs-show' style={{ cursor: 'pointer' }}></i>
                                                 ) : (
-                                                    <i class='bx bxs-hide' style={{ cursor: 'pointer' }}></i>
+                                                    <i className='bx bxs-hide' style={{ cursor: 'pointer' }}></i>
                                                 )}
                                             </span>
                                         </td>
@@ -542,7 +553,7 @@ const ECManagement = () => {
                             disabled={globalActions.length === 0}
                         >
                             Download Global PDF
-                            <i class='bx bx-download'></i>
+                            <i className='bx bx-download'></i>
                         </button>
                     <p>Actions: {globalActions.length}</p>
                     </div>
@@ -579,7 +590,7 @@ const ECManagement = () => {
                                                     className={styles.downloadBtn}
                                                 >
                                                     Download PDF
-                                                    <i class='bx bx-download'></i>
+                                                    <i className='bx bx-download'></i>
                                                 </button>
                                             </td>
                                         </tr>

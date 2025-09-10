@@ -203,7 +203,6 @@ tr:hover {
     opacity: 0.9;
 }
 
-/* ecManagement.module.css */
 .modalOverlay {
     position: fixed;
     top: 0;
@@ -278,7 +277,6 @@ tr:hover {
   }
 }
 
-/* Enhance table appearance */
 .auditContainer table th,
 .auditContainer table td {
   padding: 0.8rem;
@@ -301,8 +299,6 @@ tr:hover {
   font-style: italic;
 }
 
-
-/* Add to ecManagement.module.css */
 .downloadBtn {
   display: flex;
   align-items: center;
@@ -321,26 +317,18 @@ tr:hover {
   background: #0d9c6d;
 }
 
-.downloadBtn svg {
-  margin-bottom: -2px;
-}
-
-/* Add this to make each election appear only once */
 tr:not(:first-child) {
   border-top: 1px solid #eee;
 }
 
-/* Remove alternating row colors for this table */
 .auditContainer table tr:nth-child(even) {
   background-color: transparent;
 }
 
-/* Add subtle hover effect */
 .auditContainer table tr:hover {
   background-color: #f5f9fc;
 }
 
-/* ecManagement.module.css */
 .globalActionsSection {
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;

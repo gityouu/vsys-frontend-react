@@ -16,6 +16,7 @@ const Dashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [showTooltip, setShowTooltip] = useState(false);
     const [selectedElectionId, setSelectedElectionId] = useState(null);
+    const [copiedElectionId, setCopiedElectionId] = useState(null);
     const [originalElections, setOriginalElections] = useState([]);
     const [newRequests, setNewRequests] = useState(new Set());
     const prevPending = useRef([]);
@@ -481,6 +482,23 @@ const Dashboard = () => {
             
         } catch (error) {
             toast.error('Failed to fetch election details');
+        }
+    };
+
+    //copy function
+    const copyRegistrationLink = async (link, electionId) => {
+        try {
+            await navigator.clipboard.writeText(link);
+            setCopiedElectionId(electionId);
+            
+            setTimeout(() => {
+            setCopiedElectionId(null);
+            }, 3000);
+            
+            toast.success('Registration link copied to clipboard!');
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            toast.error('Failed to copy link');
         }
     };
 
@@ -1213,6 +1231,21 @@ const Dashboard = () => {
                                                                 {selectedElectionId === election.id
                                                                     ? 'Show all elections'
                                                                     : 'View only this election'}
+                                                                </span>
+                                                            </span>
+                                                            <span className={styles.tooltipContainer}>
+                                                                <i 
+                                                                className={`bx ${copiedElectionId === election.id ? 'bx-check' : 'bx-copy'}`}
+                                                                onClick={() => copyRegistrationLink(election.registration_link, election.id)}
+                                                                style={{ 
+                                                                    cursor: 'pointer',
+                                                                    color: copiedElectionId === election.id ? '#4CAF50' : 'inherit'
+                                                                }}
+                                                                />
+                                                                <span className={styles.tooltipText}>
+                                                                {copiedElectionId === election.id 
+                                                                    ? 'Copied!' 
+                                                                    : 'Copy registration link'}
                                                                 </span>
                                                             </span>
                                                         </td>

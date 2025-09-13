@@ -36,7 +36,8 @@ const ECManagement = () => {
         ELECTION_RESULTS_EXPORTED: 'Election Results Exported',
         ELECTION_VIEWED: 'Election Viewed',
         EC_MEMBER_CREATED: 'EC Member Created',
-        EC_MEMBER_DELETED: 'EC Member Deleted'
+        EC_MEMBER_DELETED: 'EC Member Deleted',
+        ELECTION_AUTO_DELETED: 'Election Auto-Deleted'
     };
 
     // Fetch existing EC members
@@ -203,7 +204,7 @@ const ECManagement = () => {
     const getSafeAdditionalInfo = (trail) => {
         if (!trail.additional_info) return '-';
     
-        // Format date to be human-readable
+        // Format date
         const formatDate = (dateString) => {
             if (!dateString) return 'Unknown';
             try {
@@ -242,8 +243,19 @@ const ECManagement = () => {
                 const {id, pin, password, created_at, ...safeDeletedMember} = safeInfo.deletedMember;
                 safeInfo.deletedMember = {
                     ...safeDeletedMember,
-                    created_at: formatDate(created_at) // Format the date
+                    created_at: formatDate(created_at)
                 };
+            }
+            return Object.keys(safeInfo).length > 0 
+            ? JSON.stringify(safeInfo, null, 2)
+            : '-';
+        }
+
+        // ELECTION_AUTO_DELETED actions
+        if (trail.action === 'election_auto_deleted') {
+            const safeInfo = {...trail.additional_info};
+            if (safeInfo.deletion_time) {
+                safeInfo.deletion_time = formatDate(safeInfo.deletion_time);
             }
             return Object.keys(safeInfo).length > 0 
             ? JSON.stringify(safeInfo, null, 2)

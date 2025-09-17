@@ -164,7 +164,7 @@ const ECManagement = () => {
             toast.success('Member saved successfully');
 
         } catch (err) {
-            toast.error(err.message || 'Failed to save member');
+            toast.error('Failed to save member');
         } finally {
             setLoading(false);
         }

@@ -44,7 +44,7 @@ const VoterRegister = () => {
             }
         };
         fetchElection();
-    }, [electionId]);
+    }, [electionId, navigate]);
 
     // Fetch OTP record from API when token is present
     useEffect(() => {
@@ -82,7 +82,7 @@ const VoterRegister = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                toast.error(errorData.error || 'Registration failed');
+                toast.error('Registration failed' || errorData.error);
                 return;
             }
 
@@ -120,7 +120,7 @@ const VoterRegister = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Invalid OTP');
+                throw new Error('Invalid OTP' || errorData.error);
             }
 
             const data = await response.json();

@@ -562,8 +562,8 @@ const Dashboard = () => {
             
             // Sort by role priority
             const sorted = data.sort((a, b) => 
-            ['chairperson', '1st deputy', '2nd deputy'].indexOf(a.role) -
-            ['chairperson', '1st deputy', '2nd deputy'].indexOf(b.role)
+                ['chairperson', '1st deputy', '2nd deputy'].indexOf(a.role) -
+                ['chairperson', '1st deputy', '2nd deputy'].indexOf(b.role)
             );
             
             setEcMembers(sorted);

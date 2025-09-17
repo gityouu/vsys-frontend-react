@@ -62,7 +62,7 @@ const AdminLogin = () => {
                 }
             });
         } catch (error) {
-            setErrorMessage(error.message || "Authentication failed. Please try again.");
+            setErrorMessage("Authentication failed. Please try again.");
             console.error('Login error:', error);
         } finally {
             setIsSubmitting(false);

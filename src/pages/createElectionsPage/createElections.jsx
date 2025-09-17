@@ -460,7 +460,7 @@ const CreateElections = () => {
                 const errorData = await error.response.json();
                 console.error('Error details:', errorData);
             }
-            toast.error(`Publish failed: ${error.message}`);
+            toast.error(`Publish failed`);
         } finally {
             setIsSubmitting(false);
         }

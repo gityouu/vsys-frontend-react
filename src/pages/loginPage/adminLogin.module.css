@@ -144,7 +144,6 @@ body{
     display: flex;
     align-items: center;
     text-align: center;
-    /* gap: 5px; */
 }
 
 .errorMessage .errorIcon {
@@ -154,6 +153,15 @@ body{
 .formLogInBtn:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
+}
+
+/* adminLogin.module.css */
+.inactivityError {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+    padding: 10px;
+    border-radius: 4px;
 }
 
 /* Responsive adjustments */

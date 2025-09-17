@@ -1,15 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './adminLogin.module.css';
 import 'boxicons/css/boxicons.min.css';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const AdminLogin = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [adminPin, setAdminPin] = useState("");
     const [adminPswd, setAdminPswd] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Checking for inactivity logout message
+    useEffect(() => {
+        if (location.state?.inactivityLogout) {
+            setErrorMessage(location.state.message || 'Your session has expired due to inactivity.');
+            
+            // Clearing state to prevent showing the message again on refresh
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location, navigate]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -102,7 +113,7 @@ const AdminLogin = () => {
                         </div>
 
                         {errorMessage && (
-                            <div className={styles.errorMessage}>
+                            <div className={`${styles.errorMessage} ${location.state?.inactivityLogout ? styles.inactivityError : ''}`}>
                                 {errorMessage}
                             </div>
                         )}

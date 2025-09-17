@@ -32,6 +32,8 @@ const Dashboard = () => {
     const [voteTimestamps, setVoteTimestamps] = useState([]);
     const [showSupportModal, setShowSupportModal] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [electionToDelete, setElectionToDelete] = useState(null);
     const [docsUrl] = useState('../docs');
 
     const logAuditEvent = useCallback(async (auditData) => {
@@ -482,6 +484,24 @@ const Dashboard = () => {
             
         } catch (error) {
             toast.error('Failed to fetch election details');
+        }
+    };
+
+    const handleDeleteElection = async (electionId) => {
+        try{
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/elections/${electionId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete election');
+            }
+
+            // Remove the deleted election from the state
+            setElections(prev => prev.filter(election => election.id !== electionId));
+            toast.success('Election deleted successfully');
+        } catch (error) {
+            toast.error('Failed to delete election');
         }
     };
 
@@ -955,11 +975,17 @@ const Dashboard = () => {
         const resetTimer = () => {
             clearTimeout(inactivityTimer);
             inactivityTimer = setTimeout(() => {
-                toast.info('Session expired due to inactivity');
-                // Clear session storage and redirect
-                sessionStorage.removeItem('ecAdminName');
-                sessionStorage.removeItem('ecAdminRole');
-                navigate('/');
+            toast.info('Session expired due to inactivity');
+            sessionStorage.removeItem('ecAdminName');
+            sessionStorage.removeItem('ecAdminRole');
+            
+            // Navigate to login with a state indicating inactivity logout
+            navigate('/', { 
+                state: { 
+                inactivityLogout: true,
+                message: 'Your session has expired due to inactivity. Please log in again.' 
+                } 
+            });
             }, 30 * 60 * 1000); // 30 minutes of inactivity
         };
 
@@ -1023,6 +1049,32 @@ const Dashboard = () => {
                             >
                                 Close
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {showDeleteModal && (
+                    <div className={styles.supportModalOverlay} onClick={() => setShowDeleteModal(false)}>
+                        <div className={styles.supportModal} onClick={(e) => e.stopPropagation()}>
+                        <h3>Confirm Deletion</h3>
+                        <p>Are you sure you want to delete this election? This action cannot be undone.</p>
+                        <div className={styles.modalButtons}>
+                            <button 
+                            className={styles.cancelButton}
+                            onClick={() => setShowDeleteModal(false)}
+                            >
+                            Cancel
+                            </button>
+                            <button 
+                            className={styles.confirmButton}
+                            onClick={() => {
+                                handleDeleteElection(electionToDelete);
+                                setShowDeleteModal(false);
+                            }}
+                            >
+                            Delete Election
+                            </button>
+                        </div>
                         </div>
                     </div>
                 )}
@@ -1167,7 +1219,7 @@ const Dashboard = () => {
                                                 <th>End Date</th>
                                                 <th>TurnOut</th>
                                                 <th>Status</th>
-                                                <th>Action</th>
+                                                <th>Actions</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -1237,8 +1289,7 @@ const Dashboard = () => {
                                                                 <i 
                                                                 className={`bx ${copiedElectionId === election.id ? 'bx-check' : 'bx-copy'}`}
                                                                 onClick={() => copyRegistrationLink(election.registration_link, election.id)}
-                                                                style={{ 
-                                                                    cursor: 'pointer',
+                                                                style={{
                                                                     color: copiedElectionId === election.id ? '#4CAF50' : 'inherit'
                                                                 }}
                                                                 />
@@ -1248,6 +1299,23 @@ const Dashboard = () => {
                                                                     : 'Copy registration link'}
                                                                 </span>
                                                             </span>
+                                                            {election.status === 'upcoming' && (
+                                                                <span className={styles.tooltipContainer}>
+                                                                    <i 
+                                                                    className={`bx bx-trash`}
+                                                                    onClick={() => {
+                                                                        setElectionToDelete(election.id);
+                                                                        setShowDeleteModal(true);
+                                                                    }}
+                                                                    style={{
+                                                                        color: '#c0392b'
+                                                                    }}
+                                                                    />
+                                                                    <span className={styles.tooltipText}>
+                                                                    Delete election
+                                                                    </span>
+                                                                </span>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 ));

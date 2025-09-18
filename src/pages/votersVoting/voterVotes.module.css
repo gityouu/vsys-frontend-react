@@ -137,10 +137,7 @@
 }
 
 .candidatesSection {
-    /* background: transparent; */
     padding-top: 2rem;
-    /* border-radius: 12px; */
-    /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
     width: 100%;
     margin-top: 0;
 }
@@ -599,4 +596,92 @@
     .voteButton {
         border-width: 2px;
     }
+}
+
+/* Notification styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    border-radius: 4px;
+    color: white;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.notification.error {
+    background-color: #e74c3c;
+}
+
+.notification.success {
+    background-color: #27ae60;
+}
+
+.notification.warning {
+    background-color: #f39c12;
+}
+
+.notification.info {
+    background-color: #3498db;
+}
+
+.notificationClose {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    margin-left: 15px;
+}
+
+/* Election ended notice */
+.electionEnded {
+    color: #e74c3c;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Already voted badge */
+.votedBadge {
+    background-color: #27ae60;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Already voted notice */
+.alreadyVotedNotice {
+    background-color: #f39c12;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Incomplete notice */
+.incompleteNotice {
+    color: #e74c3c;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Voting instruction */
+.votingInstruction {
+    color: #7f8c8d;
+    text-align: center;
+    margin-bottom: 15px;
 }

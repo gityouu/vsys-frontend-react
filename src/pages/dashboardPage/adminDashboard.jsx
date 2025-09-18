@@ -14,11 +14,11 @@ const Dashboard = () => {
     const location = useLocation();
 
     const [isLoading, setIsLoading] = useState(true);
-    const [showTooltip, setShowTooltip] = useState(false);
     const [selectedElectionId, setSelectedElectionId] = useState(null);
     const [copiedElectionId, setCopiedElectionId] = useState(null);
     const [originalElections, setOriginalElections] = useState([]);
     const [newRequests, setNewRequests] = useState(new Set());
+    const [showBellTooltip, setShowBellTooltip] = useState(false);
     const prevPending = useRef([]);
     const [elections, setElections] = useState([]);
     const [pendingRegistrations, setPendingRegistrations] = useState([]);
@@ -185,6 +185,33 @@ const Dashboard = () => {
             .sort((a, b) => b.createdAt - a.createdAt)[0];
     }, [elections, selectedElectionId]);
 
+    useEffect(() => {
+        // Compare current pending registrations with previous ones
+        const currentIds = pendingRegistrations.map(r => r.id);
+        const prevIds = prevPending.current.map(r => r.id);
+        
+        // Find new registrations that weren't in previous list
+        const newIds = currentIds.filter(id => !prevIds.includes(id));
+        
+        if (newIds.length > 0) {
+            setNewRequests(prev => {
+            const updated = new Set(prev);
+            newIds.forEach(id => updated.add(id));
+            return updated;
+            });
+        }
+        
+        // Update ref with current pending registrations
+        prevPending.current = pendingRegistrations;
+    }, [pendingRegistrations]);
+
+    // Clean up ref on component unmount
+    useEffect(() => {
+        return () => {
+            prevPending.current = [];
+        };
+    }, []);
+
 
     //function to handle approve/decline actions of registrants
     const handleAction = (registrationId) => {
@@ -279,8 +306,8 @@ const Dashboard = () => {
         } catch (error) {
             // Revert on error
             setPendingRegistrations(prev => [
-            ...prev, 
-            registrationToDecline
+                ...prev, 
+                registrationToDecline
             ]);
             toast.error('Decline failed');
         }
@@ -1094,17 +1121,17 @@ const Dashboard = () => {
                             />
                         </div>
                         <div className={styles.notificationBell}
-                             onMouseEnter={() => setShowTooltip(true)}
-                             onMouseLeave={() => setShowTooltip(false)}>
+                            onMouseEnter={() => setShowBellTooltip(true)}
+                            onMouseLeave={() => setShowBellTooltip(false)}>
                             <i className="bx bx-bell"></i>
                             {newRequests.size > 0 && (
                                 <span className={styles.notificationCounter}>
-                                    {newRequests.size}
+                                {newRequests.size}
                                 </span>
                             )}
-                            {showTooltip && newRequests.size > 0 && (
+                            {showBellTooltip && newRequests.size > 0 && (
                                 <div className={styles.notificationTooltip}>
-                                    {newRequests.size} new unseen request{newRequests.size !== 1 && 's'}
+                                {newRequests.size} new unseen request{newRequests.size !== 1 && 's'}
                                 </div>
                             )}
                         </div>
@@ -1372,66 +1399,73 @@ const Dashboard = () => {
                                     <div className={styles.voterListContainerTable}>
                                         <table>
                                             <thead>
-                                            <tr>
+                                                <tr>
                                                 <th>Registered At</th>
                                                 <th>Email</th>
                                                 <th>Election Title</th>
                                                 <th>Actions</th>
-                                            </tr>
+                                                </tr>
                                             </thead>
                                             <tbody>
                                                 {(() => {
-                                                    const q = searchQuery.trim().toLowerCase();
-                                                    const results = filteredPending.filter(reg =>
+                                                const q = searchQuery.trim().toLowerCase();
+                                                const results = filteredPending.filter(reg =>
                                                     reg.email.toLowerCase().includes(q) ||
                                                     reg.electionTitle.toLowerCase().includes(q)
-                                                    );
-                                                    
-                                                    if (results.length === 0) {
+                                                );
+                                                
+                                                if (results.length === 0) {
                                                     return (
-                                                        <tr>
+                                                    <tr>
                                                         <td colSpan="4" className={styles.emptyMessage}>
-                                                            <i className="bx bx-info-circle"></i>
-                                                            {q ? 'No matching registration requests' : 'No pending registration requests'}
+                                                        <i className="bx bx-info-circle"></i>
+                                                        {q ? 'No matching registration requests' : 'No pending registration requests'}
                                                         </td>
-                                                        </tr>
+                                                    </tr>
                                                     );
-                                                    }
-                                                    
-                                                    return results.map(registration => (
-                                                    <tr key={registration.id}>
-                                                        <td>
+                                                }
+                                                
+                                                return results.map(registration => (
+                                                    <tr 
+                                                    key={registration.id}
+                                                    onMouseEnter={() => setNewRequests(prev => {
+                                                        const updated = new Set(prev);
+                                                        updated.delete(registration.id);
+                                                        return updated;
+                                                    })}
+                                                    >
+                                                    <td>
                                                         {formatTimestamp(registration.registered_at)}
                                                         {newRequests.has(registration.id) && (
-                                                            <span className={styles.newRequestIndicator} />
+                                                        <span className={styles.newRequestIndicator} />
                                                         )}
-                                                        </td>
-                                                        <td className={styles.duration}>{registration.email}</td>
-                                                        <td>{registration.electionTitle}</td>
-                                                        <td>
+                                                    </td>
+                                                    <td className={styles.duration}>{registration.email}</td>
+                                                    <td>{registration.electionTitle}</td>
+                                                    <td>
                                                         <span className={styles.tooltipContainer} aria-label="Approve Voter">
-                                                            {loadingRegistrationId === registration.id ? (
+                                                        {loadingRegistrationId === registration.id ? (
                                                             <div className={styles.spinner}></div>
-                                                            ) : (
+                                                        ) : (
                                                             <i className={`bx bx-check-double ${styles.approveIcon}`}
-                                                                onClick={() => handleApprove(registration.id)}
-                                                                role="button"></i>
-                                                            )}
-                                                            <span className={styles.tooltipText}>
+                                                            onClick={() => handleApprove(registration.id)}
+                                                            role="button"></i>
+                                                        )}
+                                                        <span className={styles.tooltipText}>
                                                             {loadingRegistrationId === registration.id ?
-                                                                "Sending OTP..." : "Approve"}
-                                                            </span>
+                                                            "Sending OTP..." : "Approve"}
+                                                        </span>
                                                         </span>
                                                         <span className={styles.tooltipContainer} aria-label="Decline Voter">
-                                                            <i className={`bx bx-trash ${styles.declineIcon}`}
+                                                        <i className={`bx bx-trash ${styles.declineIcon}`}
                                                             onClick={() => !loadingRegistrationId && handleDecline(registration.id)}
                                                             role="button"
                                                             disabled={loadingRegistrationId === registration.id}></i>
-                                                            <span className={styles.tooltipText}>Decline</span>
+                                                        <span className={styles.tooltipText}>Decline</span>
                                                         </span>
-                                                        </td>
+                                                    </td>
                                                     </tr>
-                                                    ));
+                                                ));
                                                 })()}
                                             </tbody>
                                         </table>

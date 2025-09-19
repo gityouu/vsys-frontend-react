@@ -719,24 +719,6 @@ table .candidPos{
     }
 }
 
-/* New Request Indicator */
-.newRequestIndicator {
-    position: relative;
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    background: #ff4757;
-    border-radius: 50%;
-    margin-left: 8px;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(0.95); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(0.95); }
-}
-
 /* Results Tables */
 .resultsTablesContainer {
     background: white;

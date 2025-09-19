@@ -1001,11 +1001,24 @@ const Dashboard = () => {
 
         const resetTimer = () => {
             clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(() => {
+            inactivityTimer = setTimeout(async () => {
+            
+            const adminName = sessionStorage.getItem('ecAdminName');
+
+            await logAuditEvent({
+                actorType: 'System',
+                action: 'auto_logout',
+                ecMemberName: adminName,
+                additionalInfo: `${adminName} was logged out due to inactivity.`
+            });
+
+            
             toast.info('Session expired due to inactivity');
+
+            // Clear session storage
             sessionStorage.removeItem('ecAdminName');
             sessionStorage.removeItem('ecAdminRole');
-            
+
             // Navigate to login with a state indicating inactivity logout
             navigate('/', { 
                 state: { 
@@ -1030,9 +1043,9 @@ const Dashboard = () => {
                 window.removeEventListener(event, resetTimer);
             });
         };
-    }, [navigate]);
+    }, [logAuditEvent, navigate]);
 
-    // Check on initial load - KEEP THIS
+    // Check on initial load
     useEffect(() => {
         if (!sessionStorage.getItem('ecAdminName')) {
             navigate('/');
@@ -1312,34 +1325,36 @@ const Dashboard = () => {
                                                                     : 'View only this election'}
                                                                 </span>
                                                             </span>
-                                                            <span className={styles.tooltipContainer}>
-                                                                <i 
-                                                                className={`bx ${copiedElectionId === election.id ? 'bx-check' : 'bx-copy'}`}
-                                                                onClick={() => copyRegistrationLink(election.registration_link, election.id)}
-                                                                style={{
-                                                                    color: copiedElectionId === election.id ? '#4CAF50' : 'inherit'
-                                                                }}
-                                                                />
-                                                                <span className={styles.tooltipText}>
-                                                                {copiedElectionId === election.id 
-                                                                    ? 'Copied!' 
-                                                                    : 'Copy registration link'}
-                                                                </span>
-                                                            </span>
                                                             {election.status === 'upcoming' && (
-                                                                <span className={styles.tooltipContainer}>
-                                                                    <i 
-                                                                    className={`bx bx-trash`}
-                                                                    onClick={() => {
-                                                                        setElectionToDelete(election.id);
-                                                                        setShowDeleteModal(true);
-                                                                    }}
-                                                                    style={{
-                                                                        color: '#c0392b'
-                                                                    }}
-                                                                    />
-                                                                    <span className={styles.tooltipText}>
-                                                                    Delete election
+                                                                <span>
+                                                                    <span className={styles.tooltipContainer}>
+                                                                        <i 
+                                                                        className={`bx ${copiedElectionId === election.id ? 'bx-check' : 'bx-copy'}`}
+                                                                        onClick={() => copyRegistrationLink(election.registration_link, election.id)}
+                                                                        style={{
+                                                                            color: copiedElectionId === election.id ? '#4CAF50' : 'inherit'
+                                                                        }}
+                                                                        />
+                                                                        <span className={styles.tooltipText}>
+                                                                        {copiedElectionId === election.id 
+                                                                            ? 'Copied!' 
+                                                                            : 'Copy registration link'}
+                                                                        </span>
+                                                                    </span>
+                                                                    <span className={styles.tooltipContainer}>
+                                                                        <i 
+                                                                        className={`bx bx-trash`}
+                                                                        onClick={() => {
+                                                                            setElectionToDelete(election.id);
+                                                                            setShowDeleteModal(true);
+                                                                        }}
+                                                                        style={{
+                                                                            color: '#c0392b'
+                                                                        }}
+                                                                        />
+                                                                        <span className={styles.tooltipText}>
+                                                                        Delete election
+                                                                        </span>
                                                                     </span>
                                                                 </span>
                                                             )}

@@ -3,8 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import styles from './voterVotes.module.css';
 import { useNavigate } from 'react-router-dom';
 
+
 const VoterVotes = () => {
     const navigate = useNavigate();
+
     const [searchParams] = useSearchParams();
     const electionId = searchParams.get('electionId');
 
@@ -18,13 +20,6 @@ const VoterVotes = () => {
     const [isVoting, setIsVoting] = useState(false);
     const [showThankYou, setShowThankYou] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [notification, setNotification] = useState({ message: '', type: '' });
-
-    // Show notification and auto-hide after 5 seconds
-    const showNotification = (message, type = 'error') => {
-        setNotification({ message, type });
-        setTimeout(() => setNotification({ message: '', type: '' }), 5000);
-    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -52,9 +47,6 @@ const VoterVotes = () => {
             } catch (err) {
                 if (err.message.includes(err.message) || err.message.includes('Invalid')) {
                     navigate('/notFound');
-                } else {
-                    showNotification('Failed to load election data. Please try again.', 'error');
-                    setError('Failed to load election data');
                 }
             } finally {
                 setLoading(false);
@@ -92,7 +84,6 @@ const VoterVotes = () => {
             if (newTimeLeft === null) {
                 clearInterval(timer);
                 setElectionEnded(true);
-                showNotification('The election has ended. Voting is no longer allowed.', 'info');
             } else {
                 setTimeLeft(newTimeLeft);
             }
@@ -109,15 +100,8 @@ const VoterVotes = () => {
         try {
             setIsVoting(true);
             const voterEmail = sessionStorage.getItem('voterEmail');
-            if (!voterEmail) {
-                showNotification('Your voting session has expired. Please register again.', 'error');
-                return;
-            }
-            
-            if (electionEnded) {
-                showNotification('The election has ended. Voting is no longer allowed.', 'error');
-                return;
-            }
+            if (!voterEmail) throw new Error('Voter session expired');
+            if (electionEnded) throw new Error('Election has ended');
 
             // Submit vote through API
             const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/vote`, {
@@ -134,24 +118,18 @@ const VoterVotes = () => {
 
             if (!response.ok) {
             const errorData = await response.json();
-            const errorMessage = errorData.error || 'Voting failed';
-            
-            if (errorMessage.includes('position') || errorMessage.includes('already voted')) {
-                showNotification('You have already voted for this position. Each position allows only one vote.', 'warning');
-            } else if (errorMessage.includes('election ended')) {
-                showNotification('The election has ended. Voting is no longer allowed.', 'error');
-            } else {
-                showNotification('Failed to submit your vote. Please try again.', 'error');
-            }
-            
-            throw new Error(errorMessage);
+            throw new Error(errorData.error || 'Voting failed');
             }
 
             setVotes(prev => [...prev, candidateId]);
-            showNotification('Vote recorded successfully!', 'success');
 
         } catch (error) {
             console.error('Voting failed:', error);
+            alert(
+                error.message.includes('position') 
+                    ? "You've already voted for this position!"
+                    : error.message
+            );
         } finally {
             setIsVoting(false);
         }
@@ -197,19 +175,6 @@ const VoterVotes = () => {
 
     return (
         <main className={styles.mainContainer}>
-            {/* Notification Banner */}
-            {notification.message && (
-                <div className={`${styles.notification} ${styles[notification.type]}`}>
-                    {notification.message}
-                    <button 
-                        className={styles.notificationClose}
-                        onClick={() => setNotification({ message: '', type: '' })}
-                    >
-                        ×
-                    </button>
-                </div>
-            )}
-            
             {showThankYou ? (
                 <div className={styles.thankYouDialog}>
                     <div className={styles.dialogContent}>
@@ -237,7 +202,7 @@ const VoterVotes = () => {
                             </div>
                             <div className={styles.timer}>
                                 {electionEnded ? (
-                                    <p className={styles.electionEnded}>Election has ended</p>
+                                    <p>Election has ended</p>
                                 ) : timeLeft ? (
                                     <p className={styles.countdown}>
                                         Time remaining: {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
@@ -263,14 +228,8 @@ const VoterVotes = () => {
                                                     disabled={electionEnded || hasVotedForPosition(position)}
                                                 >
                                                     <i className='bx bx-door-open'></i>
-                                                    {hasVotedForPosition(position) ? "Already Voted" : "View Candidates"}
+                                                    {hasVotedForPosition(position) ? "Voted" : "View"}
                                                 </button>
-                                                {hasVotedForPosition(position) && (
-                                                    <div className={styles.votedBadge}>
-                                                        <i className='bx bx-check-circle'></i>
-                                                        Voted
-                                                    </div>
-                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -286,13 +245,7 @@ const VoterVotes = () => {
                                         </button>
                                         Candidates for {selectedPosition}
                                     </h3>
-                                    <p className={styles.votingInstruction}>Your vote is final - choose carefully</p>
-                                    {hasVotedForPosition(selectedPosition) && (
-                                        <div className={styles.alreadyVotedNotice}>
-                                            <i className='bx bx-info-circle'></i>
-                                            You've already voted for this position
-                                        </div>
-                                    )}
+                                    <p>Your vote is final - choose carefully</p>
                                     <div className={styles.candidatesSection}>
                                         <div className={styles.candidatesGrid}>
                                             {electionData?.candidates
@@ -350,14 +303,9 @@ const VoterVotes = () => {
                                     {isSubmitting ? (
                                         <div className={styles.miniSpinner}></div>
                                     ) : (
-                                        'Finish Voting'
+                                        'Done'
                                     )}
                                     </button>
-                                    {!allPositionsVoted && (
-                                        <p className={styles.incompleteNotice}>
-                                            Please vote for all positions before finishing
-                                        </p>
-                                    )}
                                 </div>
                             )}
                         </section>

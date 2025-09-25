@@ -676,7 +676,7 @@ const CreateElections = () => {
                             <label>Aspiring Position</label>
                             <input
                                 type="text"
-                                placeholder="eg; President"
+                                placeholder="eg; SRC President"
                                 name="position"
                                 value={candidateForm.position}
                                 onChange={(e) => {

@@ -106,11 +106,21 @@ const VoterRegister = () => {
     const handleOtpSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setMessage('');
         try {
             const now = new Date();
-            if (now < electionData.startTime) throw new Error('Voting not yet started');
-            if (now > electionData.endTime) throw new Error('Voting closed');
-            if (!otpRecord) throw new Error('Invalid session');
+            if (now < electionData.startTime) {
+                toast.error('Voting has not started yet');
+                return;
+            }
+            if (now > electionData.endTime) {
+                toast.error('Voting has ended');
+                return;
+            }
+            if (!otpRecord) {
+                toast.error('Invalid session. Please use a valid registration link.');
+                return;
+            }
 
             const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/voter/otps/verify`, {
                 method: 'POST',
@@ -120,7 +130,7 @@ const VoterRegister = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error('Invalid OTP' || errorData.error);
+                throw new Error(errorData.error || 'Invalid OTP');
             }
 
             const data = await response.json();
@@ -128,6 +138,7 @@ const VoterRegister = () => {
             navigate(`/voterVotes?electionId=${electionId}`);
         } catch (err) {
             setMessage(err.message);
+            toast.error(err.message);
         } finally {
             setIsSubmitting(false);
         }
@@ -141,20 +152,25 @@ const VoterRegister = () => {
 
     useEffect(() => {
         if (!electionData) return;
+        
+        const now = new Date();
+        const electionStart = new Date(electionData.startTime);
+        const electionEnd = new Date(electionData.endTime);
+        
         if (token) {
-            const now = new Date();
-            setStatus(now < electionData.startTime ? 'preElection'
-                : now <= electionData.endTime ? 'election' : 'ended');
+            setStatus(now < electionStart ? 'preElection'
+            : now <= electionEnd ? 'election' : 'ended');
         } else {
             const rs = new Date(electionData.createdAt);
             rs.setMinutes(rs.getMinutes() + 15);
-            const re = new Date(electionData.startTime);
+            const re = new Date(electionStart);
             re.setMinutes(re.getMinutes() - 15);
+            
             setStatus(
-                currentTime < rs ? 'pending'
-                    : currentTime <= re ? 'registration'
-                        : currentTime < electionData.endTime ? 'preElection'
-                            : 'ended'
+            now < rs ? 'pending'
+                : now <= re ? 'registration'
+                : now < electionEnd ? 'preElection'
+                    : 'ended'
             );
         }
     }, [currentTime, electionData, token]);
@@ -290,11 +306,19 @@ const VoterRegister = () => {
                             <div className={styles.statusImage}>
                                 <img 
                                     src="/images/logo.png" 
-                                    alt="Registration pending"
+                                    alt="Election ended"
                                 />
                             </div>
                             <h2>Election Completed</h2>
-                            <p>Thank you for participating!</p>
+                            <p>This election has ended on {electionData.endTime.toLocaleString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                })}
+                            </p>
+                            <p>Thank you for your interest in participating!</p>
                         </div>
                     )}
                 </>
@@ -353,6 +377,35 @@ const VoterRegister = () => {
                             </form>
                         </div>
                     )}
+                    {status === 'ended' && (
+                        <div className={styles.statusMessage}>
+                            <div className={styles.statusImage}>
+                                <img 
+                                    src="/images/logo.png" 
+                                    alt="Election ended"
+                                />
+                            </div>
+                            <h2>Election Completed</h2>
+                            <p>This election ended on {electionData.endTime.toLocaleString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                })}
+                            </p>
+                            <p>Thank you for your participation!</p>
+                            {otpRecord && (
+                                <div className={styles.verifiedEmail}>
+                                    <i className='bx bx-check-shield' />
+                                    Verified: {otpRecord.email}
+                                </div>
+                            )}
+                            <p className={styles.formInstruction}>
+                                The voting period has concluded and the portal is no longer accessible.
+                            </p>
+                        </div>
+                    )}
                 </>
             )}
 
@@ -360,7 +413,8 @@ const VoterRegister = () => {
                 <div className={styles.errorMessage}>
                     <h2>Error</h2>
                     <p>{error}</p>
-                </div>}
+                </div>
+            }
         </main>
     );
 };

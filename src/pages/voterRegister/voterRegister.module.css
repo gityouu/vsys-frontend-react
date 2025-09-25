@@ -156,6 +156,26 @@
     color: #dc2626;
 }
 
+.verifiedEmail {
+    background-color: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    gap: 8px;
+    color: #0369a1;
+    font-weight: 500;
+}
+
+.verifiedEmail i {
+    color: #059669;
+    font-size: 1.2rem;
+}
+
 @media (max-width: 480px) {
     .mainContainer {
         .mainContainer {

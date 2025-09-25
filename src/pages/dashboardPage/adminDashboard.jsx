@@ -227,17 +227,18 @@ const Dashboard = () => {
         try {
             setLoadingRegistrationId(registrationId);
 
-            setPendingRegistrations(prev => 
-                prev.filter(reg => reg.id !== registrationId)
-            );
-
             const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/voter/registrations/${registrationId}/approved`, {
                 method: 'PATCH'
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Approval failed');
+                if (errorData.error && errorData.error.includes('after elections has started')) {
+                    toast.error('Cannot approve registration after elections has started');
+                } else {
+                    throw new Error(errorData.error || 'Approval failed');
+                }
+                return;
             }
 
             // Only refetch after successful API call
@@ -246,7 +247,7 @@ const Dashboard = () => {
 
             // Get registration details
             const registration = pendingRegistrations.find(r => r.id === registrationId);
-    
+            
             // Log audit event
             await logAuditEvent({
                 action: 'registration_approved',
@@ -256,7 +257,7 @@ const Dashboard = () => {
                 electionTitle: registration.electionTitle,
                 voterEmail: registration.email
             });
-    
+
             handleAction(registrationId);
             toast.success('OTP sent successfully!');
         } catch (error) {
@@ -875,7 +876,7 @@ const Dashboard = () => {
             doc.text(`Final Results Summary`, 14, yPos);
             autoTable(doc, {
                 startY: yPos + 10,
-                head: [['Total Votes', 'Registered Voters', 'Turnout Percentage']],
+                head: [['Total Votes', 'Approved Voters', 'Turnout Percentage']],
                 body: [[voteCount, approvedVoters, `${turnout}%`]],
                 headStyles: { fillColor: [46, 204, 113] },
             });
@@ -955,6 +956,11 @@ const Dashboard = () => {
         // Update ref with current pending registrations
         prevPending.current = pendingRegistrations;
     }, [pendingRegistrations]);
+
+    const canApproveRegistration = (election) => {
+        const now = new Date();
+        return now < new Date(election.startTime);
+    };
 
     // Clean up ref on component unmount
     useEffect(() => {
@@ -1449,36 +1455,46 @@ const Dashboard = () => {
                                                         return updated;
                                                     })}
                                                     >
-                                                    <td>
-                                                        {formatTimestamp(registration.registered_at)}
-                                                        {newRequests.has(registration.id) && (
-                                                        <span className={styles.newRequestIndicator} />
-                                                        )}
-                                                    </td>
-                                                    <td className={styles.duration}>{registration.email}</td>
-                                                    <td>{registration.electionTitle}</td>
-                                                    <td>
-                                                        <span className={styles.tooltipContainer} aria-label="Approve Voter">
-                                                        {loadingRegistrationId === registration.id ? (
-                                                            <div className={styles.spinner}></div>
-                                                        ) : (
-                                                            <i className={`bx bx-check-double ${styles.approveIcon}`}
-                                                            onClick={() => handleApprove(registration.id)}
-                                                            role="button"></i>
-                                                        )}
-                                                        <span className={styles.tooltipText}>
-                                                            {loadingRegistrationId === registration.id ?
-                                                            "Sending OTP..." : "Approve"}
-                                                        </span>
-                                                        </span>
-                                                        <span className={styles.tooltipContainer} aria-label="Decline Voter">
-                                                        <i className={`bx bx-trash ${styles.declineIcon}`}
-                                                            onClick={() => !loadingRegistrationId && handleDecline(registration.id)}
-                                                            role="button"
-                                                            disabled={loadingRegistrationId === registration.id}></i>
-                                                        <span className={styles.tooltipText}>Decline</span>
-                                                        </span>
-                                                    </td>
+                                                        <td>
+                                                            {formatTimestamp(registration.registered_at)}
+                                                            {newRequests.has(registration.id) && (
+                                                            <span className={styles.newRequestIndicator} />
+                                                            )}
+                                                        </td>
+                                                        <td className={styles.duration}>{registration.email}</td>
+                                                        <td>{registration.electionTitle}</td>
+                                                        <td>
+                                                            {!canApproveRegistration ? (
+                                                                <>
+                                                                    <span className={styles.tooltipContainer} aria-label="Approve Voter">
+                                                                        {loadingRegistrationId === registration.id ? (
+                                                                            <div className={styles.spinner}></div>
+                                                                        ) : (
+                                                                            <i className={`bx bx-check-double ${styles.approveIcon}`}
+                                                                                onClick={() => handleApprove(registration.id)}
+                                                                                role="button">
+                                                                            </i>
+                                                                        )}
+                                                                        <span className={styles.tooltipText}>
+                                                                            {loadingRegistrationId === registration.id ?
+                                                                                "Sending OTP..." : "Approve"}
+                                                                        </span>
+                                                                    </span>
+                                                                    <span className={styles.tooltipContainer} aria-label="Decline Voter">
+                                                                        <i className={`bx bx-trash ${styles.declineIcon}`}
+                                                                            onClick={() => !loadingRegistrationId && handleDecline(registration.id)}
+                                                                            role="button"
+                                                                            disabled={loadingRegistrationId === registration.id}>
+                                                                        </i>
+                                                                        <span className={styles.tooltipText}>Decline</span>
+                                                                    </span>
+                                                                </>
+                                                            ) : (
+                                                                <span>
+                                                                    Can't approve voter within this time frame.
+                                                                </span>
+                                                            )}
+                                                        </td>
                                                     </tr>
                                                 ));
                                                 })()}
